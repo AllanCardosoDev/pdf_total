@@ -1,3 +1,5 @@
-streamlit==1.22.0
-PyPDF2==3.0.1
-pypdf==3.9.0
+streamlit
+PyPDF2
+pypdf
+Pillow
+reportlab
