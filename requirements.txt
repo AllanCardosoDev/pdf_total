@@ -1,4 +1,4 @@
 streamlit==1.22.0
 PyPDF2==3.0.1
 pypdf==3.9.0
-Pillow==9.5.0
+Pillow==9.5.0 --only-binary=:all:
