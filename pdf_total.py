@@ -46,7 +46,7 @@ def add_watermark(input_pdf, name, cpf):
     packet = BytesIO()
     can = canvas.Canvas(packet, pagesize=letter)
     can.setFont("Helvetica", 10)
-    can.setFillColorRGB(1, 0, 0)  # Cor vermelha
+    can.setFillColorRGB(0.0118, 0.3843, 0.5725)  # Cor #036292
     can.drawString(0, 10, f" {name} - {cpf_exibicao}")
     can.save()
     packet.seek(0)
@@ -419,27 +419,27 @@ def main():
 
     elif choice == "Adicionar Marca d'água":
         st.subheader("Adicionar Marca d'água")
-        st.write("Esta opção permite adicionar uma marca d'água a todas as páginas de um PDF.")
-        arquivo_pdf = st.file_uploader("Selecione o arquivo PDF", type='pdf')
+        st.write("Esta opção permite adicionar uma marca d'água a todas as páginas de um ou mais PDFs.")
+        arquivos_pdf = st.file_uploader("Selecione os arquivos PDF", type='pdf', accept_multiple_files=True)
         
         tipo_marca = st.radio("Tipo de marca d'água", ["Texto", "Imagem"])
         
         if tipo_marca == "Texto":
             marca_dagua = st.text_input("Digite o texto da marca d'água")
-            tamanho = st.slider("Tamanho da fonte", 10, 100, 40)
-            cor = st.color_picker("Cor do texto", "#888888")
-            rotacao = st.slider("Rotação (graus)", 0, 360, 45)
+            tamanho = st.slider("Tamanho da fonte", 10, 100, 15)  # Valor padrão alterado para 15
+            cor = st.color_picker("Cor do texto", "#036292")  # Cor padrão alterada para #036292
+            rotacao = st.slider("Rotação (graus)", 0, 360, 0)  # Valor padrão alterado para 0
         else:
             marca_dagua = st.file_uploader("Selecione a imagem para marca d'água", type=['png', 'jpg', 'jpeg'])
         
-        posicao_x = st.slider("Posição X", 0, 500, 100)
-        posicao_y = st.slider("Posição Y", 0, 700, 300)
+        posicao_x = st.slider("Posição X", 0, 500, 10)  # Valor padrão alterado para 10
+        posicao_y = st.slider("Posição Y", 0, 700, 10)  # Valor padrão alterado para 10
         
         if tipo_marca == "Imagem":
             largura = st.slider("Largura da imagem", 50, 500, 200)
             altura = st.slider("Altura da imagem", 50, 500, 200)
         
-        if arquivo_pdf and ((tipo_marca == "Texto" and marca_dagua) or (tipo_marca == "Imagem" and marca_dagua)):
+        if arquivos_pdf and ((tipo_marca == "Texto" and marca_dagua) or (tipo_marca == "Imagem" and marca_dagua)):
             if st.button("Adicionar Marca d'água"):
                 opcoes = {
                     'tipo': tipo_marca,
@@ -451,14 +451,41 @@ def main():
                     'largura': largura if tipo_marca == "Imagem" else None,
                     'altura': altura if tipo_marca == "Imagem" else None
                 }
-                dados_pdf = adicionar_marca_dagua(arquivo_pdf, marca_dagua, opcoes)
-                nome_arquivo = f'{Path(arquivo_pdf.name).stem}_marca.pdf'
-                st.download_button(
-                    'Baixar PDF com Marca d\'água',
-                    data=dados_pdf,
-                    file_name=nome_arquivo,
-                    mime="application/pdf"
-                )
+                
+                processed_pdfs = []
+                progress_bar = st.progress(0)
+                for i, arquivo_pdf in enumerate(arquivos_pdf):
+                    dados_pdf = adicionar_marca_dagua(arquivo_pdf, marca_dagua, opcoes)
+                    nome_arquivo = f'{Path(arquivo_pdf.name).stem}_marca.pdf'
+                    processed_pdfs.append((nome_arquivo, dados_pdf))
+                    progress_bar.progress((i + 1) / len(arquivos_pdf))
+
+                st.success("Marca d'água adicionada com sucesso a todos os PDFs! 🎉")
+
+                # Opção para baixar todos os PDFs em um arquivo ZIP
+                if len(processed_pdfs) > 1:
+                    zip_buffer = BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+                        for file_name, file_data in processed_pdfs:
+                            zip_file.writestr(file_name, file_data)
+                    
+                    st.download_button(
+                        label="📥 Baixar todos os PDFs com marca d'água (ZIP)",
+                        data=zip_buffer.getvalue(),
+                        file_name="pdfs_com_marca_dagua.zip",
+                        mime="application/zip"
+                    )
+
+                # Opção para baixar PDFs individualmente
+                st.write("Ou baixe os PDFs individualmente:")
+                for file_name, file_data in processed_pdfs:
+                    st.download_button(
+                        label=f"📥 Baixar {file_name}",
+                        data=file_data,
+                        file_name=file_name,
+                        mime="application/pdf",
+                        key=file_name  # Necessário para criar botões únicos
+                    )
 
     elif choice == "Imagens para PDF":
         st.subheader("Imagens para PDF")
