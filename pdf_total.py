@@ -426,11 +426,13 @@ def main():
         
         if tipo_marca == "Texto":
             marca_dagua = st.text_input("Digite o texto da marca d'água")
+            nome_completo = st.text_input("Digite o nome completo")
             tamanho = st.slider("Tamanho da fonte", 10, 100, 15)  # Valor padrão alterado para 15
             cor = st.color_picker("Cor do texto", "#036292")  # Cor padrão alterada para #036292
             rotacao = st.slider("Rotação (graus)", 0, 360, 0)  # Valor padrão alterado para 0
         else:
             marca_dagua = st.file_uploader("Selecione a imagem para marca d'água", type=['png', 'jpg', 'jpeg'])
+            nome_completo = st.text_input("Digite o nome completo")
         
         posicao_x = st.slider("Posição X", 0, 500, 10)  # Valor padrão alterado para 10
         posicao_y = st.slider("Posição Y", 0, 700, 10)  # Valor padrão alterado para 10
@@ -452,11 +454,14 @@ def main():
                     'altura': altura if tipo_marca == "Imagem" else None
                 }
                 
+                primeiro_nome = nome_completo.split()[0].lower() if nome_completo else ""
+                
                 processed_pdfs = []
                 progress_bar = st.progress(0)
                 for i, arquivo_pdf in enumerate(arquivos_pdf):
                     dados_pdf = adicionar_marca_dagua(arquivo_pdf, marca_dagua, opcoes)
-                    nome_arquivo = f'{Path(arquivo_pdf.name).stem}_marca.pdf'
+                    nome_original = Path(arquivo_pdf.name).stem
+                    nome_arquivo = f'{nome_original}_{primeiro_nome}.pdf'
                     processed_pdfs.append((nome_arquivo, dados_pdf))
                     progress_bar.progress((i + 1) / len(arquivos_pdf))
 
