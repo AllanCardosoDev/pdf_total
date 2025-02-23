@@ -1,6 +1,5 @@
 import streamlit as st
 import re
-from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.colors import Color
