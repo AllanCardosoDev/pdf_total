@@ -8,6 +8,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from io import BytesIO
 import os
 import pypdf
+from pypdf import PdfReader, PdfWriter  # Adicionada importação correta
 import tempfile
 from pathlib import Path
 from PIL import Image
@@ -79,9 +80,9 @@ def encrypt_pdf(input_pdf, password):
     return output_packet
 
 def combinar_arquivos_pdf(arquivos_pdf, paginas_selecionadas=None):
-    escritor = pypdf.PdfWriter()
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
     for i, arquivo_pdf in enumerate(arquivos_pdf):
-        leitor = pypdf.PdfReader(arquivo_pdf)
+        leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
         if paginas_selecionadas and i in paginas_selecionadas:
             for num_pagina in paginas_selecionadas[i]:
                 if 0 <= num_pagina < len(leitor.pages):
@@ -93,8 +94,8 @@ def combinar_arquivos_pdf(arquivos_pdf, paginas_selecionadas=None):
     return dados_pdf
 
 def extrair_paginas_pdf(arquivo_pdf, paginas):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
     for num_pagina in paginas:
         if 1 <= num_pagina <= len(leitor.pages):
             escritor.add_page(leitor.pages[num_pagina - 1])
@@ -142,6 +143,7 @@ def gerar_arquivo_pdf_com_imagens(imagens, opcoes):
     packet.seek(0)
     novo_pdf = PdfReader(packet)
     escritor = PdfWriter()
+
     for pagina in novo_pdf.pages:
         escritor.add_page(pagina)
 
@@ -175,8 +177,8 @@ def adicionar_marca_dagua(arquivo_pdf, marca_dagua, opcoes):
     return dados_pdf
 
 def rotacionar_paginas(arquivo_pdf, paginas_rotacao):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     for i, pagina in enumerate(leitor.pages):
         if i in paginas_rotacao:
@@ -186,8 +188,8 @@ def rotacionar_paginas(arquivo_pdf, paginas_rotacao):
     return pegar_dados_pdf(escritor)
 
 def comprimir_pdf(arquivo_pdf):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     for pagina in leitor.pages:
         pagina.compress_content_streams()  # Isso faz uma compressão básica
@@ -196,8 +198,8 @@ def comprimir_pdf(arquivo_pdf):
     return pegar_dados_pdf(escritor)
 
 def adicionar_numeracao(arquivo_pdf, posicao, inicio):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     for i, pagina in enumerate(leitor.pages):
         packet = BytesIO()
@@ -213,15 +215,15 @@ def adicionar_numeracao(arquivo_pdf, posicao, inicio):
             can.drawString(30, pagina.mediabox.height - 30, str(i + inicio))
         can.save()
         packet.seek(0)
-        nova_pagina = pypdf.PdfReader(packet).pages[0]
+        nova_pagina = PdfReader(packet).pages[0]  # Alterado de pypdf.PdfReader para PdfReader
         pagina.merge_page(nova_pagina)
         escritor.add_page(pagina)
 
     return pegar_dados_pdf(escritor)
 
 def remover_paginas(arquivo_pdf, paginas_remover):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     for i, pagina in enumerate(leitor.pages):
         if i + 1 not in paginas_remover:
@@ -230,8 +232,8 @@ def remover_paginas(arquivo_pdf, paginas_remover):
     return pegar_dados_pdf(escritor)
 
 def comparar_pdfs(arquivo_pdf1, arquivo_pdf2):
-    leitor1 = pypdf.PdfReader(arquivo_pdf1)
-    leitor2 = pypdf.PdfReader(arquivo_pdf2)
+    leitor1 = PdfReader(arquivo_pdf1)  # Alterado de pypdf.PdfReader para PdfReader
+    leitor2 = PdfReader(arquivo_pdf2)  # Alterado de pypdf.PdfReader para PdfReader
 
     if len(leitor1.pages) != len(leitor2.pages):
         return "Os PDFs têm números diferentes de páginas."
@@ -244,8 +246,8 @@ def comparar_pdfs(arquivo_pdf1, arquivo_pdf2):
     return "\n".join(diferencas) if diferencas else "Nenhuma diferença encontrada."
 
 def adicionar_marca_dagua_imagem(arquivo_pdf, imagem_marca, opcoes):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     marca_dagua = Image.open(imagem_marca)
 
@@ -256,15 +258,15 @@ def adicionar_marca_dagua_imagem(arquivo_pdf, imagem_marca, opcoes):
                       width=opcoes['largura'], height=opcoes['altura'], mask='auto')
         can.save()
         packet.seek(0)
-        nova_pagina = pypdf.PdfReader(packet).pages[0]
+        nova_pagina = PdfReader(packet).pages[0]  # Alterado de pypdf.PdfReader para PdfReader
         pagina.merge_page(nova_pagina)
         escritor.add_page(pagina)
 
     return pegar_dados_pdf(escritor)
 
 def redact_pdf(arquivo_pdf, texto_redact):
-    leitor = pypdf.PdfReader(arquivo_pdf)
-    escritor = pypdf.PdfWriter()
+    leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
+    escritor = PdfWriter()  # Alterado de pypdf.PdfWriter para PdfWriter
 
     for pagina in leitor.pages:
         conteudo = pagina.extract_text()
@@ -532,7 +534,7 @@ def main():
         st.subheader("Rotação de Páginas")
         arquivo_pdf = st.file_uploader("Selecione o arquivo PDF", type='pdf')
         if arquivo_pdf:
-            leitor = pypdf.PdfReader(arquivo_pdf)
+            leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
             num_paginas = len(leitor.pages)
             st.write(f"O PDF tem {num_paginas} páginas.")
             
@@ -587,7 +589,7 @@ def main():
         st.subheader("Remover Páginas do PDF")
         arquivo_pdf = st.file_uploader("Selecione o arquivo PDF", type='pdf')
         if arquivo_pdf:
-            leitor = pypdf.PdfReader(arquivo_pdf)
+            leitor = PdfReader(arquivo_pdf)  # Alterado de pypdf.PdfReader para PdfReader
             num_paginas = len(leitor.pages)
             st.write(f"O PDF tem {num_paginas} páginas.")
             paginas_remover = st.multiselect("Selecione as páginas para remover", range(1, num_paginas + 1))
